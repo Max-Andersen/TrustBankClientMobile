@@ -1,8 +1,9 @@
 plugins {
-    id("com.android.application")
+    id("com.android.application") version "8.2.2"
     id("org.jetbrains.kotlin.android")
     id("kotlinx-serialization")
     id("com.google.devtools.ksp")
+    id("com.google.protobuf")
 }
 
 android {
@@ -54,6 +55,80 @@ android {
     }
 }
 
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.21.7"
+    }
+    plugins {
+        create("java") {
+            artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0"
+        }
+        create("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.25.0"
+        }
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("java") {
+                    option("lite")
+                }
+            }
+            task.plugins {
+                create("grpc") {
+                    option("lite")
+                }
+            }
+        }
+    }
+
+//    plugins {
+//        generateProtoTasks {
+//            all().forEach {
+//                it.builtins {
+//                    create("java") {
+//                        option("lite")
+//                    }
+//                }
+//            }
+//        }
+//    }
+}
+
+
+//protobuf {
+//    protoc {
+//        artifact = "com.google.protobuf:protoc:3.10.1"
+//    }
+//    plugins {
+//        create("java") {
+//            artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0"
+//        }
+//        create("grpc") {
+//            artifact = "io.grpc:protoc-gen-grpc-java:1.25.0"
+//        }
+////        create("grpckt") {
+////            artifact = libs.protoc.gen.grpc.kotlin.get().toString() + ":jdk8@jar"
+////        }
+//    }
+//    generateProtoTasks {
+//        all().forEach {
+//            it.plugins {
+//                create("java") {
+//                    option("lite")
+//                }
+//                create("grpc") {
+//                    option("lite")
+//                }
+//                create("grpckt") {
+//                    option("lite")
+//                }
+//            }
+//
+//        }
+//    }
+//}
+
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
     implementation("androidx.core:core-ktx:1.12.0")
@@ -91,4 +166,10 @@ dependencies {
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
+
+
+    implementation("io.grpc:grpc-okhttp:1.60.0")
+    implementation("io.grpc:grpc-protobuf-lite:1.60.0")
+    implementation("io.grpc:grpc-stub:1.60.0")
+    implementation("org.apache.tomcat:annotations-api:6.0.53")
 }
