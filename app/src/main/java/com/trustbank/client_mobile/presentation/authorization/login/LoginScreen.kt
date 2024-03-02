@@ -55,6 +55,9 @@ fun LoginScreen(
                 is LoginEffect.OnRegisterClicked -> {
                     navController.navigate(AppNavigation.Register.routeTo())
                 }
+                is LoginEffect.OnLoginSuccess -> {
+                    navController.navigate(AppNavigation.Main.routeTo())
+                }
             }
         }
     }

@@ -21,11 +21,11 @@ class LoginViewModel : ViewModel() {
     val uiState = _uiState.asStateFlow()
     val effects = _effects.asSharedFlow()
 
-    private fun login(
+    private suspend fun login(
         login: String,
         password: String
     ) {
-
+        _effects.emit(LoginEffect.OnLoginSuccess)
     }
 
     fun reduce(intent: LoginIntent) {
@@ -86,4 +86,6 @@ sealed class LoginIntent {
 
 sealed class LoginEffect {
     data object OnRegisterClicked : LoginEffect()
+
+    data object OnLoginSuccess : LoginEffect()
 }

@@ -12,16 +12,22 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.trustbank.client_mobile.presentation.authorization.login.LoginScreen
 import com.trustbank.client_mobile.presentation.authorization.register.RegisterScreen
+import com.trustbank.client_mobile.presentation.main.MainScreen
 
 sealed class AppNavigation : Navigation() {
-    object Login: AppNavigation() {
+    data object Login : AppNavigation() {
         override val route: String = "login"
     }
 
-    object Register: AppNavigation(){
+    data object Register : AppNavigation() {
         override val route: String = "register"
+    }
+
+    data object Main : AppNavigation() {
+        override val route: String = "main"
     }
 
 
@@ -52,11 +58,10 @@ fun NavGraph(
                 navController = navController
             )
         }
-
         composable(
-            route = Screen.Main.route
+            route = AppNavigation.Main.route
         ) {
-
+            MainScreen()
         }
     }
 }
