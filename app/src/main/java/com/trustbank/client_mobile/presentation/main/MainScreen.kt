@@ -3,7 +3,6 @@ package com.trustbank.client_mobile.presentation.main
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -16,18 +15,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.Modifier.Companion
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.trustbank.client_mobile.presentation.main.info.UserInfoScreen
+import com.trustbank.client_mobile.presentation.main.accounts.list.UserAccountsListScreen
+import com.trustbank.client_mobile.presentation.navigation.AppNavigation
 import com.trustbank.client_mobile.presentation.navigation.BottomBarScreen
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    externalNavController: NavHostController
+) {
     val navController = rememberNavController()
 
     Scaffold(
@@ -40,7 +40,9 @@ fun MainScreen() {
             modifier = Modifier.padding(paddingValues = paddings)
         ) {
             composable(BottomBarScreen.Home.route) {
-                UserInfoScreen(navController = navController)
+                UserAccountsListScreen(navController = navController){
+                    externalNavController.navigate(AppNavigation.AccountCard.routeTo(it))
+                }
             }
             composable(BottomBarScreen.Loans.route) {
                 TestScreen(name = "Loans")

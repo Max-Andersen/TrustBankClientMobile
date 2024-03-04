@@ -4,7 +4,8 @@ import android.net.Uri
 import com.trustbank.client_mobile.domain.AccountRepository
 import com.trustbank.client_mobile.presentation.authorization.login.LoginViewModel
 import com.trustbank.client_mobile.presentation.authorization.register.RegisterViewModel
-import com.trustbank.client_mobile.presentation.main.info.UserInfoViewModel
+import com.trustbank.client_mobile.presentation.main.accounts.card.AccountCardViewModel
+import com.trustbank.client_mobile.presentation.main.accounts.list.UserAccountsListViewModel
 import com.trustbank.client_mobile.proto.AccountOperationsServiceGrpc
 import com.trustbank.client_mobile.proto.AccountOperationsServiceGrpc.AccountOperationsServiceStub
 import io.grpc.ManagedChannelBuilder
@@ -24,7 +25,11 @@ val appModule = module {
     }
 
     viewModel{
-        UserInfoViewModel(get())
+        UserAccountsListViewModel(get())
+    }
+
+    viewModel{
+        AccountCardViewModel(get(), get())
     }
 
 

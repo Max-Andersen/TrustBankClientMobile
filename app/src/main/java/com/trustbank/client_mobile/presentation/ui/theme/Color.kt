@@ -1,6 +1,14 @@
 package com.trustbank.client_mobile.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+
+// Paddings
+val PADDING_LARGE = 32.dp
+val PADDING_BIG = 16.dp
+val PADDING_MEDIUM = 8.dp
+val PADDING_SMALL = 4.dp
 
 val primaryLight = Color(0xFF006B5D)
 val onPrimaryLight = Color(0xFFFFFFFF)

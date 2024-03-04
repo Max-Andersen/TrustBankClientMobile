@@ -1,14 +1,15 @@
-package com.trustbank.client_mobile.presentation.main.info
+package com.trustbank.client_mobile.presentation.main.accounts.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trustbank.client_mobile.domain.AccountRepository
 import com.trustbank.client_mobile.proto.Account
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class UserInfoViewModel(
+class UserAccountsListViewModel(
     private val accountRepository: AccountRepository
 ) : ViewModel() {
 
@@ -16,12 +17,19 @@ class UserInfoViewModel(
 
     val uiState = _uiState.asStateFlow()
 
+    private var updatingJob: Job? = null
+
     init {
         refreshAccountsList()
     }
 
     fun refreshAccountsList() {
-        viewModelScope.launch {
+        updatingJob?.let { existingJob ->
+            if (existingJob.isActive)
+                existingJob.cancel()
+        }
+
+        updatingJob = viewModelScope.launch {
             _uiState.value = _uiState.value.copy(accounts = emptyList())
             accountRepository.getAccounts().collect { account ->
                 account.onSuccess {
@@ -32,6 +40,7 @@ class UserInfoViewModel(
                 // TODO: handle error (скорее не произойдёт)
             }
         }
+
     }
 }
 
