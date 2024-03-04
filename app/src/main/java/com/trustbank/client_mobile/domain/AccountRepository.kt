@@ -5,6 +5,7 @@ import com.trustbank.client_mobile.proto.Account
 import com.trustbank.client_mobile.proto.AccountOperationsServiceGrpc
 import com.trustbank.client_mobile.proto.Client
 import com.trustbank.client_mobile.proto.CloseAccountRequest
+import com.trustbank.client_mobile.proto.GetAccountInfoRequest
 import com.trustbank.client_mobile.proto.GetAccountsRequest
 import com.trustbank.client_mobile.proto.GetHistoryOfAccountRequest
 import com.trustbank.client_mobile.proto.LoginRequest
@@ -14,20 +15,18 @@ import com.trustbank.client_mobile.proto.OperationResponse
 import com.trustbank.client_mobile.proto.TransactionHistoryPage
 import io.grpc.stub.ClientCallStreamObserver
 import io.grpc.stub.ClientResponseObserver
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
 
 class AccountRepository(
     private val grpcService: AccountOperationsServiceGrpc.AccountOperationsServiceStub
 ) {
     private fun <T, U> getObserver(
-        onNext: (U) -> Unit,
-        onError: (Throwable) -> Unit,
+        resultFlow: MutableSharedFlow<Result<U>>,
+        onNext: ((U) -> Unit)? = null,
+        onError: ((Throwable) -> Unit)? = null,
         onCompleted: () -> Unit = {}
     ): ClientResponseObserver<T, U> {
         return object : ClientResponseObserver<T, U> {
@@ -35,12 +34,20 @@ class AccountRepository(
 
             override fun onNext(value: U) {
                 Log.d("Grpc", "got data $value")
-                onNext(value)
+                onNext?.let {
+                    it(value)
+                } ?: runBlocking {
+                    resultFlow.emit(Result.success(value))
+                }
             }
 
             override fun onError(t: Throwable?) {
                 Log.d("Grpc", "request failed with error $t")
-                onError(t ?: Throwable("Unknown error"))
+                onError?.let {
+                    it(t!!)
+                } ?: runBlocking {
+                    resultFlow.emit(Result.failure(t!!))
+                }
             }
 
             override fun onCompleted() {
@@ -51,116 +58,86 @@ class AccountRepository(
     }
 
 
-    fun login(login: String, password: String): Result<Client> {
+    fun login(login: String, password: String): SharedFlow<Result<Client>> {
         val request = LoginRequest.newBuilder()
             .setLogin(login)
             .setPassword(password)
             .build()
-        var response: Result<Client> = Result.failure(Throwable("Unknown error"))
-
-        val observer = getObserver<LoginRequest, Client>(
-            onNext = { client -> response = Result.success(client) },
-            onError = { error -> response = Result.failure(error) },
-        )
-
+        val responseFlow: MutableSharedFlow<Result<Client>> = MutableSharedFlow()
+        val observer = getObserver<LoginRequest, Client>(responseFlow)
         grpcService.login(request, observer)
-        return response
+        return responseFlow.asSharedFlow()
     }
 
 
-    suspend fun getAccounts(userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc"): SharedFlow<Result<Account>> {
+    fun getAccounts(userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc"): SharedFlow<Result<Account>> {
         val request = GetAccountsRequest.newBuilder()
             .setUserId(userId)
             .build()
         val responseFlow: MutableSharedFlow<Result<Account>> = MutableSharedFlow()
-
-        val observer = getObserver<LoginRequest, Account>(
-            onNext = { client -> runBlocking { responseFlow.emit(Result.success(client)) } },
-            onError = { error -> runBlocking { responseFlow.emit(Result.failure(error)) } },
-        )
-
+        val observer = getObserver<GetAccountsRequest, Account>(responseFlow)
         grpcService.getAccounts(request, observer)
-
-
         return responseFlow.asSharedFlow()
     }
 
-    suspend fun getAccount(userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc"): SharedFlow<Result<Account>> {
-        val request = GetAccountsRequest.newBuilder()
-            .setUserId(userId)
+    fun getAccount(userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc", accountId: String): SharedFlow<Result<Account>> {
+        val request = GetAccountInfoRequest.newBuilder()
+            .setAccountId(accountId)
             .build()
         val responseFlow: MutableSharedFlow<Result<Account>> = MutableSharedFlow()
-
-        val observer = getObserver<LoginRequest, Account>(
-            onNext = { client -> runBlocking { responseFlow.emit(Result.success(client)) } },
-            onError = { error -> runBlocking { responseFlow.emit(Result.failure(error)) } },
-        )
-
-        grpcService.getAccounts(request, observer)
-
+        val observer = getObserver<GetAccountInfoRequest, Account>(responseFlow)
+        grpcService.getAccountInfo(request, observer)
         return responseFlow.asSharedFlow()
     }
 
-    fun openNewAccount(userId: String): Result<OperationResponse> {
+    fun openNewAccount(userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc"): SharedFlow<Result<OperationResponse>> {
         val request = OpenAccountRequest.newBuilder()
             .setUserId(userId)
             .build()
-        var response: Result<OperationResponse> = Result.failure(Throwable("Unknown error"))
-
-        val observer = getObserver<GetAccountsRequest, OperationResponse>(
-            onNext = { client -> response = Result.success(client) },
-            onError = { error -> response = Result.failure(error) },
-        )
-
+        val responseFlow: MutableSharedFlow<Result<OperationResponse>> = MutableSharedFlow()
+        val observer = getObserver<GetAccountsRequest, OperationResponse>(responseFlow)
         grpcService.openNewAccount(request, observer)
-        return response
+        return responseFlow.asSharedFlow()
     }
 
-    fun closeAccount(userId: String, accountId: String): Result<OperationResponse> {
+    fun closeAccount(userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc", accountId: String): SharedFlow<Result<OperationResponse>> {
         val request = CloseAccountRequest.newBuilder()
-            .setUserId(accountId)
+            .setAccountId(accountId)
             .build()
-        var response: Result<OperationResponse> = Result.failure(Throwable("Unknown error"))
-
-        val observer = getObserver<CloseAccountRequest, OperationResponse>(
-            onNext = { client -> response = Result.success(client) },
-            onError = { error -> response = Result.failure(error) },
-        )
-
+        val responseFlow: MutableSharedFlow<Result<OperationResponse>> = MutableSharedFlow()
+        val observer = getObserver<CloseAccountRequest, OperationResponse>(responseFlow)
         grpcService.closeAccount(request, observer)
-        return response
+        return responseFlow
     }
 
-    fun depositMoney(userId: String, accountId: String, amount: Long): Result<OperationResponse> {
+    fun depositMoney(
+        userId: String,
+        accountId: String,
+        amount: Long
+    ): SharedFlow<Result<OperationResponse>> {
         val request = MoneyOperation.newBuilder()
             .setUserId(accountId)
             .setAmount(amount)
             .build()
-        var response: Result<OperationResponse> = Result.failure(Throwable("Unknown error"))
-
-        val observer = getObserver<CloseAccountRequest, OperationResponse>(
-            onNext = { client -> response = Result.success(client) },
-            onError = { error -> response = Result.failure(error) },
-        )
-
+        val responseFlow: MutableSharedFlow<Result<OperationResponse>> = MutableSharedFlow()
+        val observer = getObserver<CloseAccountRequest, OperationResponse>(responseFlow)
         grpcService.depositMoney(request, observer)
-        return response
+        return responseFlow
     }
 
-    fun withdrawMoney(userId: String, accountId: String, amount: Long): Result<OperationResponse> {
+    fun withdrawMoney(
+        userId: String,
+        accountId: String,
+        amount: Long
+    ): SharedFlow<Result<OperationResponse>> {
         val request = MoneyOperation.newBuilder()
             .setUserId(accountId)
             .setAmount(amount)
             .build()
-        var response: Result<OperationResponse> = Result.failure(Throwable("Unknown error"))
-
-        val observer = getObserver<CloseAccountRequest, OperationResponse>(
-            onNext = { client -> response = Result.success(client) },
-            onError = { error -> response = Result.failure(error) },
-        )
-
+        val responseFlow: MutableSharedFlow<Result<OperationResponse>> = MutableSharedFlow()
+        val observer = getObserver<CloseAccountRequest, OperationResponse>(responseFlow)
         grpcService.withdrawMoney(request, observer)
-        return response
+        return responseFlow
     }
 
     fun getHistoryOfAccount(
@@ -168,21 +145,16 @@ class AccountRepository(
         accountId: String,
         pageNumber: Int,
         pageSize: Int
-    ): Result<TransactionHistoryPage> {
+    ): SharedFlow<Result<TransactionHistoryPage>> {
         val request = GetHistoryOfAccountRequest.newBuilder()
             .setAccountId(accountId)
             .setPageNumber(pageNumber)
             .setPageSize(pageSize)
             .build()
-        var response: Result<TransactionHistoryPage> = Result.failure(Throwable("Unknown error"))
-
-        val observer = getObserver<GetHistoryOfAccountRequest, TransactionHistoryPage>(
-            onNext = { client -> response = Result.success(client) },
-            onError = { error -> response = Result.failure(error) },
-        )
-
+        val responseFlow: MutableSharedFlow<Result<TransactionHistoryPage>> = MutableSharedFlow()
+        val observer = getObserver<GetHistoryOfAccountRequest, TransactionHistoryPage>(responseFlow)
         grpcService.getHistoryOfAccount(request, observer)
-        return response
+        return responseFlow
     }
 
 

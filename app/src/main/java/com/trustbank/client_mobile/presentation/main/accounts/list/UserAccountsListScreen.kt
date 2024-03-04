@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -55,7 +56,8 @@ fun UserAccountsListScreen(
     UserInfoScreenStateless(
         pullRefreshState = pullRefreshState,
         uiState = uiState,
-        navigateToAccountCard = navigateToAccountCard
+        navigateToAccountCard = navigateToAccountCard,
+        openNewAccount = remember { { viewModel.openNewAccount() } }
     )
 }
 
@@ -64,8 +66,8 @@ fun UserAccountsListScreen(
 private fun UserInfoScreenStateless(
     pullRefreshState: PullToRefreshState,
     uiState: UserInfoUiState,
-    navigateToAccountCard: (id: String) -> Unit = {}
-
+    navigateToAccountCard: (id: String) -> Unit = {},
+    openNewAccount: () -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier
@@ -73,7 +75,7 @@ private fun UserInfoScreenStateless(
         topBar = {
             SingleLevelAppBar(
                 title = "Счёта", actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { openNewAccount() }) {
                         Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
                     }
                 },

@@ -95,7 +95,6 @@ fun NavGraph(
             route = AppNavigation.AccountCard.mask,
             arguments = AppNavigation.AccountCard.arguments
         ) {
-            Log.d("AccountCardScreen", "id = ${it.arguments?.getString("id")} ")
             AccountCardScreen(navController = navController, onBackClick = {
                 navController.popBackStack()
             })

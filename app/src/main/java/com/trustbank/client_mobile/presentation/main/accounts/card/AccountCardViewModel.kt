@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.trustbank.client_mobile.domain.AccountRepository
 import com.trustbank.client_mobile.proto.Account
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -21,13 +23,31 @@ class AccountCardViewModel(
 
     val account = accountData.asStateFlow()
 
+    private val _effects: MutableSharedFlow<AccountCardEffect> = MutableSharedFlow()
+
+    val effects = _effects.asSharedFlow()
+
     init {
         viewModelScope.launch {
-            accountRepository.getAccount().first().onSuccess {
+            accountRepository.getAccount(accountId = id).first().onSuccess {
                 accountData.emit(it)
             }.onFailure {
                 Log.d("AccountCardViewModel", "Error when load account data: $it")
             }
         }
     }
+
+    fun closeAccount() {
+        viewModelScope.launch {
+            accountRepository.closeAccount(accountId = id).first().onSuccess {
+                _effects.emit(AccountCardEffect.NavigateBack)
+            }.onFailure {
+                Log.d("AccountCardViewModel", "Error when delete account: $it")
+            }
+        }
+    }
+}
+
+sealed class AccountCardEffect {
+    data object NavigateBack : AccountCardEffect()
 }

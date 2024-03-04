@@ -2,11 +2,13 @@ package com.trustbank.client_mobile.presentation.main.accounts.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.trustbank.client_mobile.domain.AccountRepository
 import com.trustbank.client_mobile.proto.Account
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class UserAccountsListViewModel(
@@ -41,6 +43,14 @@ class UserAccountsListViewModel(
             }
         }
 
+    }
+
+    fun openNewAccount() {
+        viewModelScope.launch {
+            accountRepository.openNewAccount().first().onSuccess {
+                refreshAccountsList()
+            }
+        }
     }
 }
 

@@ -12,12 +12,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import com.sibstream.digitallab.ui.topbar.SingleLevelAppBar
 import com.trustbank.client_mobile.presentation.ui.theme.PADDING_BIG
+import com.trustbank.client_mobile.presentation.ui.theme.TrustBankClientMobileTheme
 import com.trustbank.client_mobile.presentation.ui.utils.convertToReadableTimeLess
 import com.trustbank.client_mobile.proto.Account
 import org.koin.androidx.compose.koinViewModel
@@ -32,9 +36,18 @@ fun AccountCardScreen(
     val viewModel: AccountCardViewModel = koinViewModel()
     val uiState by viewModel.account.collectAsState()
 
+    LaunchedEffect(key1 = Unit){
+        viewModel.effects.collect{
+            when(it){
+                is AccountCardEffect.NavigateBack -> onBackClick()
+            }
+        }
+    }
+
     AccountCardScreenStateless(
         uiState = uiState,
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
+        closeAccount = remember{{ viewModel.closeAccount() }}
     )
 
 }
@@ -42,7 +55,8 @@ fun AccountCardScreen(
 @Composable
 fun AccountCardScreenStateless(
     uiState: Account?,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    closeAccount: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -50,7 +64,7 @@ fun AccountCardScreenStateless(
                 title = "Информация по счёту",
                 onBackClick = onBackClick,
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = { closeAccount() }) {
                         Icon(imageVector = Icons.Rounded.Delete, contentDescription = null)
                     }
                 })
@@ -86,5 +100,16 @@ fun AccountCardScreenStateless(
             }
 
         }
+    }
+}
+
+@Composable
+@Preview
+private fun AccountCardScreenPreview() {
+    TrustBankClientMobileTheme {
+        AccountCardScreenStateless(
+            uiState = Account.newBuilder().setId("1").setBalance(1000).build(),
+            onBackClick = {}
+        )
     }
 }
