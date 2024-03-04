@@ -111,12 +111,13 @@ class AccountRepository(
     }
 
     fun depositMoney(
-        userId: String,
+        userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc",
         accountId: String,
         amount: Long
     ): SharedFlow<Result<OperationResponse>> {
         val request = MoneyOperation.newBuilder()
-            .setUserId(accountId)
+            .setAccountId(accountId)
+            .setUserId(userId)
             .setAmount(amount)
             .build()
         val responseFlow: MutableSharedFlow<Result<OperationResponse>> = MutableSharedFlow()
@@ -126,12 +127,13 @@ class AccountRepository(
     }
 
     fun withdrawMoney(
-        userId: String,
+        userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc",
         accountId: String,
         amount: Long
     ): SharedFlow<Result<OperationResponse>> {
         val request = MoneyOperation.newBuilder()
-            .setUserId(accountId)
+            .setAccountId(accountId)
+            .setUserId(userId)
             .setAmount(amount)
             .build()
         val responseFlow: MutableSharedFlow<Result<OperationResponse>> = MutableSharedFlow()
@@ -141,7 +143,7 @@ class AccountRepository(
     }
 
     fun getHistoryOfAccount(
-        userId: String,
+        userId: String = "173ea10f-0915-4c47-a8a3-d293f0aa24bc",
         accountId: String,
         pageNumber: Int,
         pageSize: Int

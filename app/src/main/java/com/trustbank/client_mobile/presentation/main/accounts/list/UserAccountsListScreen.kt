@@ -91,7 +91,7 @@ private fun UserInfoScreenStateless(
             LazyColumn(Modifier.fillMaxSize()) {
                 items(uiState.accounts) {
                     ListItem(
-                        { Text(text = "Счёт id = ${it.id}\nБаланс: ${it.balance}") },
+                        { Text(text = "Счёт id = ${it.id}\nБаланс: ${it.balance / 100f} руб.") },
                         modifier = Modifier.clickable { navigateToAccountCard(it.id) }
                     )
                 }

@@ -28,6 +28,9 @@ class AccountCardViewModel(
     val effects = _effects.asSharedFlow()
 
     init {
+        updateAccountData()
+    }
+    private fun updateAccountData() {
         viewModelScope.launch {
             accountRepository.getAccount(accountId = id).first().onSuccess {
                 accountData.emit(it)
@@ -46,8 +49,29 @@ class AccountCardViewModel(
             }
         }
     }
+
+    fun deposit(amount: Int) {
+        viewModelScope.launch {
+            accountRepository.depositMoney(accountId = id, amount = amount.toLong()).first().onSuccess {
+                updateAccountData()
+            }.onFailure {
+                Log.d("AccountCardViewModel", "Error when deposit money: $it")
+            }
+        }
+    }
+
+    fun withdraw(amount: Int) {
+        viewModelScope.launch {
+            accountRepository.withdrawMoney(accountId = id, amount = amount.toLong()).first().onSuccess {
+                updateAccountData()
+            }.onFailure {
+                Log.d("AccountCardViewModel", "Error when withdraw money: $it")
+            }
+        }
+    }
 }
 
 sealed class AccountCardEffect {
     data object NavigateBack : AccountCardEffect()
+
 }
