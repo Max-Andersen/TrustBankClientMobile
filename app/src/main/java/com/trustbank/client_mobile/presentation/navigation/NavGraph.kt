@@ -35,10 +35,20 @@ sealed class AppNavigation : Navigation() {
         override val route: String = "main"
     }
 
-    data object AccountCard: AppNavigation() {
+    data object AccountCard : AppNavigation() {
         override val route: String = "accountCard"
         override val arguments: List<NamedNavArgument> = generateMaskFromArguments {
             listOf(navArgument("id") { type = NavType.StringType })
+        }
+
+
+        fun routeTo(id: String): String = super.routeTo(id)
+    }
+
+    data object NewCreditCard : AppNavigation() {
+        override val route: String = "newCreditCard"
+        override val arguments: List<NamedNavArgument> = generateMaskFromArguments {
+            listOf(navArgument("tariffId") { type = NavType.StringType })
         }
 
 

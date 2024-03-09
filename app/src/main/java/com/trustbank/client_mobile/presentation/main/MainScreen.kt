@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.trustbank.client_mobile.presentation.main.accounts.list.UserAccountsListScreen
+import com.trustbank.client_mobile.presentation.main.tariffs.TariffListScreen
 import com.trustbank.client_mobile.presentation.navigation.AppNavigation
 import com.trustbank.client_mobile.presentation.navigation.BottomBarScreen
 
@@ -46,7 +47,9 @@ fun MainScreen(
                 }
             }
             composable(BottomBarScreen.Loans.route) {
-                TestScreen(name = "Loans")
+                TariffListScreen { tariffId ->
+                    externalNavController.navigate(AppNavigation.NewCreditCard.routeTo(tariffId))
+                }
             }
             composable(BottomBarScreen.History.route) {
                 TestScreen(name = "History")

@@ -2,6 +2,7 @@ package com.trustbank.client_mobile.presentation.main.accounts.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +14,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
@@ -21,7 +26,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -30,6 +37,7 @@ import androidx.navigation.NavHostController
 import com.sibstream.digitallab.ui.topbar.SingleLevelAppBar
 import com.trustbank.client_mobile.presentation.ui.theme.TrustBankClientMobileTheme
 import com.trustbank.client_mobile.proto.Account
+import com.trustbank.client_mobile.proto.Loan
 import kotlinx.coroutines.delay
 import org.koin.androidx.compose.koinViewModel
 
@@ -69,18 +77,24 @@ private fun UserInfoScreenStateless(
     navigateToAccountCard: (id: String) -> Unit = {},
     openNewAccount: () -> Unit = {}
 ) {
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabTitles = listOf("Дебетовые", "Кредитные")
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
         topBar = {
             SingleLevelAppBar(
-                title = "Счёта", actions = {
-                    IconButton(onClick = { openNewAccount() }) {
-                        Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
-                    }
-                },
+                title = "Счета",
                 backButtonRequired = false
             )
+        },
+        floatingActionButton = {
+            if (selectedTabIndex == 0) {
+                IconButton(onClick = { openNewAccount() }) {
+                    Icon(imageVector = Icons.Rounded.Add, contentDescription = null)
+                }
+            }
         }
     ) { paddings ->
         Box(
@@ -88,17 +102,75 @@ private fun UserInfoScreenStateless(
                 .padding(paddings)
                 .nestedScroll(pullRefreshState.nestedScrollConnection)
         ) {
-            LazyColumn(Modifier.fillMaxSize()) {
-                items(uiState.accounts) {
-                    ListItem(
-                        { Text(text = "Счёт id = ${it.id}\nБаланс: ${it.balance / 100f} руб.") },
-                        modifier = Modifier.clickable { navigateToAccountCard(it.id) }
+            Column {
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    indicator = { tabPositions ->
+                        if (selectedTabIndex < tabPositions.size) {
+                            TabRowDefaults.SecondaryIndicator(
+                                Modifier.tabIndicatorOffset(
+                                    tabPositions[selectedTabIndex]
+                                )
+                            )
+                        }
+                    }
+                ) {
+                    tabTitles.forEachIndexed { index, title ->
+                        Tab(
+                            text = { Text(title) },
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index }
+                        )
+                    }
+                }
+
+                when (selectedTabIndex) {
+                    0 -> DebitAccountsList(
+                        accounts = uiState.accounts,
+                        navigateToAccountCard = navigateToAccountCard
+                    )
+
+                    1 -> CreditAccountsList(
+                        accounts = uiState.loans,
+                        navigateToAccountCard = navigateToAccountCard
                     )
                 }
             }
             PullToRefreshContainer(
                 modifier = Modifier.align(Alignment.TopCenter),
                 state = pullRefreshState,
+            )
+
+        }
+    }
+}
+
+
+@Composable
+fun DebitAccountsList(
+    accounts: List<Account>,
+    navigateToAccountCard: (id: String) -> Unit
+) {
+    LazyColumn(Modifier.fillMaxSize()) {
+        items(accounts) {
+            ListItem(
+                { Text(text = "Счёт id = ${it.id}\nБаланс: ${it.balance / 100f} руб.") },
+                modifier = Modifier.clickable { navigateToAccountCard(it.id) }
+            )
+        }
+    }
+}
+
+@Composable
+fun CreditAccountsList(
+    accounts: List<Loan>,
+    navigateToAccountCard: (id: String) -> Unit
+) {
+    LazyColumn(Modifier.fillMaxSize()) {
+        items(accounts) {
+            ListItem(
+                { Text(text = "Счёт id = ${it.id}\nЗадолжность: ${it.amountDebt / 100f} руб.") },
+                modifier = Modifier.clickable { navigateToAccountCard(it.id) }
             )
         }
     }

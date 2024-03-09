@@ -4,17 +4,20 @@ import android.net.Uri
 import com.trustbank.client_mobile.localClientDataPreferences
 import com.trustbank.client_mobile.data.HeaderClientInterceptor
 import com.trustbank.client_mobile.domain.AccountRepository
+import com.trustbank.client_mobile.domain.LoanRepository
 import com.trustbank.client_mobile.domain.UserRepository
 import com.trustbank.client_mobile.domain.usecase.LoginUseCase
 import com.trustbank.client_mobile.presentation.authorization.login.LoginViewModel
 import com.trustbank.client_mobile.presentation.authorization.register.RegisterViewModel
 import com.trustbank.client_mobile.presentation.main.accounts.card.AccountCardViewModel
 import com.trustbank.client_mobile.presentation.main.accounts.list.UserAccountsListViewModel
+import com.trustbank.client_mobile.presentation.main.tariffs.TariffListViewModel
 import com.trustbank.client_mobile.proto.AccountOperationServiceGrpc
 import com.trustbank.client_mobile.proto.AccountOperationServiceGrpc.AccountOperationServiceStub
+import com.trustbank.client_mobile.proto.LoanOperationServiceGrpc
+import com.trustbank.client_mobile.proto.LoanOperationServiceGrpc.LoanOperationServiceStub
 import com.trustbank.client_mobile.proto.UserOperationServiceGrpc
 import com.trustbank.client_mobile.proto.UserOperationServiceGrpc.UserOperationServiceStub
-import io.grpc.ClientInterceptor
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import org.koin.android.ext.koin.androidContext
@@ -38,11 +41,14 @@ val appModule = module {
     }
 
     viewModel {
-        UserAccountsListViewModel(get())
+        UserAccountsListViewModel(get(), get())
     }
 
     viewModel {
         AccountCardViewModel(get(), get())
+    }
+    viewModel {
+        TariffListViewModel(get())
     }
 
 
@@ -51,6 +57,9 @@ val appModule = module {
     }
     single {
         UserRepository(get())
+    }
+    single {
+        LoanRepository(get())
     }
 
     single {
@@ -77,5 +86,10 @@ val appModule = module {
     single<UserOperationServiceStub> {
         val channel: ManagedChannel = get()
         UserOperationServiceGrpc.newStub(channel)
+    }
+
+    single<LoanOperationServiceStub> {
+        val channel: ManagedChannel = get()
+        LoanOperationServiceGrpc.newStub(channel)
     }
 }
