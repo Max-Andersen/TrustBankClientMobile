@@ -21,6 +21,7 @@ import com.trustbank.client_mobile.presentation.authorization.login.LoginScreen
 import com.trustbank.client_mobile.presentation.authorization.register.RegisterScreen
 import com.trustbank.client_mobile.presentation.main.MainScreen
 import com.trustbank.client_mobile.presentation.main.accounts.card.AccountCardScreen
+import com.trustbank.client_mobile.presentation.main.newcredit.CreateCreditScreen
 
 sealed class AppNavigation : Navigation() {
     data object Login : AppNavigation() {
@@ -48,11 +49,14 @@ sealed class AppNavigation : Navigation() {
     data object NewCreditCard : AppNavigation() {
         override val route: String = "newCreditCard"
         override val arguments: List<NamedNavArgument> = generateMaskFromArguments {
-            listOf(navArgument("tariffId") { type = NavType.StringType })
+            listOf(
+                navArgument("tariffId") { type = NavType.StringType },
+                navArgument("interestRate") { type = NavType.StringType },
+            )
         }
 
 
-        fun routeTo(id: String): String = super.routeTo(id)
+        fun routeTo(id: String, rate: String): String = super.routeTo(id, rate)
     }
 
     data object NewDebitAccount : AppNavigation() {
@@ -96,9 +100,18 @@ fun NavGraph(
 
 
         composable(
-            route = AppNavigation.NewDebitAccount.route
+            route = AppNavigation.NewCreditCard.mask,
+            arguments = AppNavigation.NewCreditCard.arguments
+
         ) {
-            // NewDebitAccountScreen(navController)
+            val tariffId = it.arguments?.getString("tariffId")
+            val interestRate = it.arguments?.getString("interestRate") ?: ""
+
+            CreateCreditScreen(
+                interestRatio = interestRate,
+                mainScreenNavigate = {
+                    navController.navigate(AppNavigation.Main.route)
+                })
         }
 
         composable(

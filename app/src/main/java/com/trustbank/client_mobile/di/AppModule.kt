@@ -11,6 +11,7 @@ import com.trustbank.client_mobile.presentation.authorization.login.LoginViewMod
 import com.trustbank.client_mobile.presentation.authorization.register.RegisterViewModel
 import com.trustbank.client_mobile.presentation.main.accounts.card.AccountCardViewModel
 import com.trustbank.client_mobile.presentation.main.accounts.list.UserAccountsListViewModel
+import com.trustbank.client_mobile.presentation.main.newcredit.CreateCreditViewModel
 import com.trustbank.client_mobile.presentation.main.tariffs.TariffListViewModel
 import com.trustbank.client_mobile.proto.AccountOperationServiceGrpc
 import com.trustbank.client_mobile.proto.AccountOperationServiceGrpc.AccountOperationServiceStub
@@ -49,6 +50,9 @@ val appModule = module {
     }
     viewModel {
         TariffListViewModel(get())
+    }
+    viewModel {
+        CreateCreditViewModel(get(), get())
     }
 
 

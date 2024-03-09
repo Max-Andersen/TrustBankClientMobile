@@ -51,8 +51,11 @@ class LoanRepository(
     }
 
 
-    fun createLoan(): SharedFlow<Result<LoanRequest>> {
+    fun createLoan(tariffId: String, issuedAmount: Double, loanTermInDays: Int, ): SharedFlow<Result<LoanRequest>> {
         val request = CreateLoanRequestRequest.newBuilder()
+            .setIssuedAmount((issuedAmount * 100L).toLong())
+            .setLoanTermInDays(loanTermInDays)
+            .setTariffId(tariffId)
             .build()
         val responseFlow: MutableSharedFlow<Result<LoanRequest>> = MutableSharedFlow()
         val observer = getObserver<CreateLoanRequestRequest, LoanRequest>(responseFlow)

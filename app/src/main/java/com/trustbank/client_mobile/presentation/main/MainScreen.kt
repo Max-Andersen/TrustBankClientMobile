@@ -47,8 +47,8 @@ fun MainScreen(
                 }
             }
             composable(BottomBarScreen.Loans.route) {
-                TariffListScreen { tariffId ->
-                    externalNavController.navigate(AppNavigation.NewCreditCard.routeTo(tariffId))
+                TariffListScreen { tariffId, rate ->
+                    externalNavController.navigate(AppNavigation.NewCreditCard.routeTo(tariffId, rate))
                 }
             }
             composable(BottomBarScreen.History.route) {

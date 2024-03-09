@@ -31,7 +31,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun TariffListScreen(
-    onTariffClick: (id: String) -> Unit,
+    onTariffClick: (id: String, rate: String) -> Unit,
 ) {
     val viewModel: TariffListViewModel = koinViewModel()
     val items by viewModel.tariffList.collectAsState()
@@ -49,7 +49,7 @@ fun TariffListScreen(
 private fun TariffListScreenContent(
     items: List<LoanTariff>?,
     refreshTariffs: suspend () -> Unit = {},
-    onTariffClick: (String) -> Unit = {}
+    onTariffClick: (String, String) -> Unit
 ) {
     if (items == null) {
         Box(
@@ -107,7 +107,7 @@ private fun TariffListScreenContent(
                 horizontalArrangement = spacedBy(8.dp),
             ) {
                 items(items = items, key = { it.id }) {
-                    TariffListItem(item = it, onClick = { onTariffClick(it.id) })
+                    TariffListItem(item = it, onClick = { onTariffClick(it.id, it.interestRate.toString()) })
                 }
             }
             PullToRefreshContainer(
