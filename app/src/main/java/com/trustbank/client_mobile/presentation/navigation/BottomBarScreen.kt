@@ -1,29 +1,26 @@
 package com.trustbank.client_mobile.presentation.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.ShoppingCart
-import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.trustbank.client_mobile.R
 
 sealed class BottomBarScreen(
     val route: String,
-    val icon: ImageVector
+    val icon: Int
 ) {
     data object Loans : BottomBarScreen(
         route = "loans",
-        icon = Icons.Rounded.Warning
+        icon = R.drawable.money_icon
     )
 
     data object Home : BottomBarScreen(
         route = "home",
-        icon = Icons.Rounded.Home
+        icon = R.drawable.bank_icon
     )
 
     data object History : BottomBarScreen(
         route = "history",
-        icon = Icons.Rounded.ShoppingCart
+        icon = R.drawable.shopping_cart
     )
 }

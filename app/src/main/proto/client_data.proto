@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+package com.trustbank.client_mobile.proto;
+
+message LocalClientPreferences{
+  string id = 1;
+}

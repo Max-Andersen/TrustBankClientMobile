@@ -1,19 +1,25 @@
 package com.trustbank.client_mobile.presentation.authorization.login
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.trustbank.client_mobile.domain.UserRepository
+import com.trustbank.client_mobile.domain.usecase.LoginUseCase
 import com.trustbank.client_mobile.presentation.authorization.login.LoginIntent.*
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val loginUseCase: LoginUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     private val _effects = MutableSharedFlow<LoginEffect>()
@@ -25,7 +31,15 @@ class LoginViewModel : ViewModel() {
         login: String,
         password: String
     ) {
-        _effects.emit(LoginEffect.OnLoginSuccess)
+        loginUseCase(login, password).collectLatest {
+            it.onSuccess {
+                _effects.emit(LoginEffect.OnLoginSuccess)
+            }
+            it.onFailure { e ->
+                // TODO show error
+                Log.d("LoginViewModel", "login error ${e.message}")
+            }
+        }
     }
 
     fun reduce(intent: LoginIntent) {

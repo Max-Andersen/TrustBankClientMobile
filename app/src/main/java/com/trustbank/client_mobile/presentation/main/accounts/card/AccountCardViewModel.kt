@@ -50,9 +50,9 @@ class AccountCardViewModel(
         }
     }
 
-    fun deposit(amount: Int) {
+    fun deposit(amount: Double) {
         viewModelScope.launch {
-            accountRepository.depositMoney(accountId = id, amount = amount.toLong()).first().onSuccess {
+            accountRepository.depositMoney(accountId = id, amount = (amount * 100).toLong()).first().onSuccess {
                 updateAccountData()
             }.onFailure {
                 Log.d("AccountCardViewModel", "Error when deposit money: $it")
@@ -60,9 +60,9 @@ class AccountCardViewModel(
         }
     }
 
-    fun withdraw(amount: Int) {
+    fun withdraw(amount: Double) {
         viewModelScope.launch {
-            accountRepository.withdrawMoney(accountId = id, amount = amount.toLong()).first().onSuccess {
+            accountRepository.withdrawMoney(accountId = id, amount = (amount * 100).toLong()).first().onSuccess {
                 updateAccountData()
             }.onFailure {
                 Log.d("AccountCardViewModel", "Error when withdraw money: $it")

@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import com.sibstream.digitallab.ui.topbar.SingleLevelAppBar
 import com.trustbank.client_mobile.presentation.ui.theme.PADDING_BIG
 import com.trustbank.client_mobile.presentation.ui.theme.TrustBankClientMobileTheme
+import com.trustbank.client_mobile.presentation.ui.utils.OutlinedDoubleField
 import com.trustbank.client_mobile.presentation.ui.utils.convertToReadableTimeLess
 import com.trustbank.client_mobile.proto.Account
 import org.koin.androidx.compose.koinViewModel
@@ -86,7 +87,7 @@ private fun AccountCardScreenStateless(
     closeAccount: () -> Unit = {},
     dialogState: AccountEventDialog?,
     changeDialogState: (AccountEventDialog?) -> Unit,
-    moneyOperation: (Int) -> Unit = {}
+    moneyOperation: (Double) -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -105,7 +106,7 @@ private fun AccountCardScreenStateless(
         dialogState?.let {
             var dialogTitle = ""
             var dialogText = ""
-            var inputNumber by remember { mutableStateOf("") }
+            var inputNumber: Double? by remember { mutableStateOf(null) }
 
             when (it) {
                 is AccountEventDialog.Deposit -> {
@@ -130,11 +131,16 @@ private fun AccountCardScreenStateless(
                 text = {
                     Column {
                         Text(text = dialogText)
-                        TextField(
+                        OutlinedDoubleField(
                             value = inputNumber,
+                            label = "",
                             onValueChange = { newNumber -> inputNumber = newNumber },
-                            keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
                         )
+//                        TextField(
+//                            value = inputNumber,
+//                            onValueChange = { newNumber -> inputNumber = newNumber },
+//                            keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number),
+//                        )
                     }
                 },
                 onDismissRequest = {
@@ -143,8 +149,8 @@ private fun AccountCardScreenStateless(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            if (inputNumber.isNotEmpty()) {
-                                moneyOperation(inputNumber.toInt())
+                            inputNumber?.let { value ->
+                                moneyOperation(value)
                                 changeDialogState(null)
                             }
                         }

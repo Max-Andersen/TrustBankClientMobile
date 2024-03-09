@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -40,7 +41,7 @@ fun MainScreen(
             modifier = Modifier.padding(paddingValues = paddings)
         ) {
             composable(BottomBarScreen.Home.route) {
-                UserAccountsListScreen(navController = navController){
+                UserAccountsListScreen(navController = navController) {
                     externalNavController.navigate(AppNavigation.AccountCard.routeTo(it))
                 }
             }
@@ -92,7 +93,7 @@ fun AppBottomBar(navController: NavHostController) {
                 },
                 icon = {
                     Icon(
-                        imageVector = bottomBarScreen.icon,
+                        painter = painterResource(id = bottomBarScreen.icon),
                         contentDescription = null
                     )
                 }

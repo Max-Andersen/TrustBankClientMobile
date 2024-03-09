@@ -167,6 +167,10 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
+    val datastore_version = "1.0.0"
+    implementation("androidx.datastore:datastore:$datastore_version")
+    implementation("androidx.datastore:datastore-preferences:$datastore_version")
+
 
     implementation("io.grpc:grpc-okhttp:1.60.0")
     implementation("io.grpc:grpc-protobuf-lite:1.60.0")
