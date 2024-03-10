@@ -188,25 +188,37 @@ fun DebitAccountsList(
         verticalArrangement = Arrangement.spacedBy(PADDING_BIG)
     ) {
         items(accounts) {
-            OutlinedCard(
-                onClick = { navigateToAccountCard(it.id) }
-            ) {
-                Column(
-                    Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "id = ${it.id}",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    SpacerMedium()
-                    Text(text = "Баланс: ${it.balance / 100f} руб.")
-                }
-            }
+            AccountItem(
+                onClick = navigateToAccountCard,
+                account = it
+            )
         }
     }
 }
+
+@Composable
+fun AccountItem(
+    onClick: (id: String) -> Unit,
+    account: Account
+){
+    OutlinedCard(
+        onClick = { onClick(account.id) }
+    ) {
+        Column(
+            Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "id = ${account.id}",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            SpacerMedium()
+            Text(text = "Баланс: ${account.balance / 100f} руб.")
+        }
+    }
+}
+
 
 @Composable
 fun CreditAccountsList(
@@ -229,11 +241,6 @@ fun CreditAccountsList(
                         .padding(16.dp)
                         .fillMaxWidth()
                 ) {
-                    Text(
-                        text = "id = ${it.id}",
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                    SpacerMedium()
                     Text(text = "Задолжность: ${it.amountDebt / 100f} руб.")
                     SpacerSmall()
                     Text(text = "Ставка: ${it.interestRate}%/день")

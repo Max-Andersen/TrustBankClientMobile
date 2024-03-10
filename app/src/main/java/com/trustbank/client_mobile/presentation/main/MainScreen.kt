@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.trustbank.client_mobile.presentation.main.accounts.list.UserAccountsListScreen
+import com.trustbank.client_mobile.presentation.main.history.AccountsHistoryScreen
 import com.trustbank.client_mobile.presentation.main.loancreation.CreditCreationScreen
 import com.trustbank.client_mobile.presentation.navigation.AppNavigation
 import com.trustbank.client_mobile.presentation.navigation.BottomBarScreen
@@ -70,7 +71,13 @@ fun MainScreen(
                 )
             }
             composable(BottomBarScreen.History.route) {
-                TestScreen(name = "History")
+                AccountsHistoryScreen(
+                    navigateBack = { navController.popBackStack() }
+                ) { accountId: String ->
+                    externalNavController.navigate(
+                        AppNavigation.AccountHistory.routeTo(accountId)
+                    )
+                }
             }
         }
     }

@@ -12,6 +12,8 @@ import com.trustbank.client_mobile.presentation.authorization.register.RegisterV
 import com.trustbank.client_mobile.presentation.main.accounts.card.AccountCardViewModel
 import com.trustbank.client_mobile.presentation.main.accounts.card.CreditViewModel
 import com.trustbank.client_mobile.presentation.main.accounts.list.UserAccountsListViewModel
+import com.trustbank.client_mobile.presentation.main.history.AccountsHistoryViewModel
+import com.trustbank.client_mobile.presentation.main.history.operations.AccountOperationsViewModel
 import com.trustbank.client_mobile.presentation.main.newcredit.CreateCreditViewModel
 import com.trustbank.client_mobile.presentation.main.loancreation.TariffListViewModel
 import com.trustbank.client_mobile.proto.AccountOperationServiceGrpc
@@ -57,6 +59,14 @@ val appModule = module {
     }
     viewModel {
         CreditViewModel(get(),get(), get())
+    }
+
+    viewModel {
+        AccountsHistoryViewModel(get())
+    }
+
+    viewModel {
+        AccountOperationsViewModel(get(), get())
     }
 
 

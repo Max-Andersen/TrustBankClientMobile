@@ -19,6 +19,7 @@ import com.trustbank.client_mobile.presentation.authorization.register.RegisterS
 import com.trustbank.client_mobile.presentation.main.MainScreen
 import com.trustbank.client_mobile.presentation.main.accounts.card.AccountCardScreen
 import com.trustbank.client_mobile.presentation.main.accounts.card.CreditCardScreen
+import com.trustbank.client_mobile.presentation.main.history.operations.AccountOperationsScreen
 import com.trustbank.client_mobile.presentation.main.newcredit.CreateCreditScreen
 
 sealed class AppNavigation : Navigation() {
@@ -65,6 +66,16 @@ sealed class AppNavigation : Navigation() {
 
 
         fun routeTo(id: String, rate: String): String = super.routeTo(id, rate)
+    }
+
+    data object AccountHistory : AppNavigation() {
+        override val route: String = "accountHistory"
+        override val arguments: List<NamedNavArgument> = generateMaskFromArguments {
+            listOf(navArgument("accountId") { type = NavType.StringType })
+        }
+
+        fun routeTo(accountId: String): String = super.routeTo(accountId)
+
     }
 
     data object NewDebitAccount : AppNavigation() {
@@ -120,6 +131,16 @@ fun NavGraph(
                 mainScreenNavigate = {
                     navController.navigate(AppNavigation.Main.route)
                 })
+        }
+
+        composable(
+            route = AppNavigation.AccountHistory.mask,
+            arguments = AppNavigation.AccountHistory.arguments
+
+        ) {
+            val accountId = it.arguments?.getString("accountId")
+
+            AccountOperationsScreen()
         }
 
         composable(

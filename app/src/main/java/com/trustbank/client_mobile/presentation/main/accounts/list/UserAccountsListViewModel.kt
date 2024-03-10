@@ -3,9 +3,11 @@ package com.trustbank.client_mobile.presentation.main.accounts.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.protobuf.Type
 import com.trustbank.client_mobile.domain.AccountRepository
 import com.trustbank.client_mobile.domain.LoanRepository
 import com.trustbank.client_mobile.proto.Account
+import com.trustbank.client_mobile.proto.AccountType
 import com.trustbank.client_mobile.proto.Loan
 import com.trustbank.client_mobile.proto.ShortLoanInfo
 import kotlinx.coroutines.Job
@@ -44,8 +46,10 @@ class UserAccountsListViewModel(
                 launch {
                     accountRepository.getAccounts().collect { account ->
                         account.onSuccess {
-                            val currentAccounts = _uiState.value.accounts
-                            _uiState.value = _uiState.value.copy(accounts = currentAccounts + it)
+                            if (it.type == AccountType.DEPOSIT){
+                                val currentAccounts = _uiState.value.accounts
+                                _uiState.value = _uiState.value.copy(accounts = currentAccounts + it)
+                            }
                         }
 
                         // TODO: handle error (скорее не произойдёт)
