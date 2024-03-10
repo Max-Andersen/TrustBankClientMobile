@@ -1,4 +1,4 @@
-package com.trustbank.client_mobile.presentation.main.tariffs
+package com.trustbank.client_mobile.presentation.main.loancreation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer

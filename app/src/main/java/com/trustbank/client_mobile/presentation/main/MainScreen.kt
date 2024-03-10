@@ -22,7 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.trustbank.client_mobile.presentation.main.accounts.list.UserAccountsListScreen
-import com.trustbank.client_mobile.presentation.main.tariffs.TariffListScreen
+import com.trustbank.client_mobile.presentation.main.loancreation.CreditCreationScreen
 import com.trustbank.client_mobile.presentation.navigation.AppNavigation
 import com.trustbank.client_mobile.presentation.navigation.BottomBarScreen
 
@@ -42,14 +42,32 @@ fun MainScreen(
             modifier = Modifier.padding(paddingValues = paddings)
         ) {
             composable(BottomBarScreen.Home.route) {
-                UserAccountsListScreen(navController = navController) {
-                    externalNavController.navigate(AppNavigation.AccountCard.routeTo(it))
-                }
+                UserAccountsListScreen(
+                    navController = navController,
+                    navigateToAccountCard = {
+                        externalNavController.navigate(
+                            AppNavigation.AccountCard.routeTo(it)
+                        )
+                    },
+                    navigateToCreditCard = {
+                        externalNavController.navigate(
+                            AppNavigation.CreditCard.routeTo(it)
+                        )
+                    }
+                )
             }
             composable(BottomBarScreen.Loans.route) {
-                TariffListScreen { tariffId, rate ->
-                    externalNavController.navigate(AppNavigation.NewCreditCard.routeTo(tariffId, rate))
-                }
+                CreditCreationScreen(
+                    onTariffClick = { tariffId, rate ->
+                        externalNavController.navigate(
+                            AppNavigation.NewCreditCard.routeTo(
+                                tariffId,
+                                rate
+                            )
+                        )
+                    },
+                    onLoanRequestClick = {}
+                )
             }
             composable(BottomBarScreen.History.route) {
                 TestScreen(name = "History")

@@ -1,24 +1,20 @@
 package com.trustbank.client_mobile.domain
 
-import android.util.Log
 import com.trustbank.client_mobile.proto.Account
 import com.trustbank.client_mobile.proto.AccountOperationServiceGrpc
-import com.trustbank.client_mobile.proto.Client
 import com.trustbank.client_mobile.proto.CloseAccountRequest
 import com.trustbank.client_mobile.proto.GetAccountInfoRequest
 import com.trustbank.client_mobile.proto.GetAccountsRequest
 import com.trustbank.client_mobile.proto.GetHistoryOfAccountRequest
-import com.trustbank.client_mobile.proto.LoginRequest
 import com.trustbank.client_mobile.proto.MoneyOperation
 import com.trustbank.client_mobile.proto.OpenAccountRequest
 import com.trustbank.client_mobile.proto.OperationResponse
+import com.trustbank.client_mobile.proto.Transaction
 import com.trustbank.client_mobile.proto.TransactionHistoryPage
-import io.grpc.stub.ClientCallStreamObserver
-import io.grpc.stub.ClientResponseObserver
+import com.trustbank.client_mobile.proto.TransferMoneyRequest
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.runBlocking
 
 class AccountRepository(
     private val grpcService: AccountOperationServiceGrpc.AccountOperationServiceStub
@@ -87,6 +83,18 @@ class AccountRepository(
         val responseFlow: MutableSharedFlow<Result<OperationResponse>> = MutableSharedFlow()
         val observer = getObserver<CloseAccountRequest, OperationResponse>(responseFlow)
         grpcService.withdrawMoney(request, observer)
+        return responseFlow
+    }
+
+    fun transferMoney(fromAccountId: String, toAccountId: String, amount: Long): SharedFlow<Result<Transaction>> {
+        val request = TransferMoneyRequest.newBuilder()
+            .setFromAccountId(fromAccountId)
+            .setToAccountId(toAccountId)
+            .setAmount(amount)
+            .build()
+        val responseFlow: MutableSharedFlow<Result<Transaction>> = MutableSharedFlow()
+        val observer = getObserver<TransferMoneyRequest, Transaction>(responseFlow)
+        grpcService.transferMoney(request, observer)
         return responseFlow
     }
 

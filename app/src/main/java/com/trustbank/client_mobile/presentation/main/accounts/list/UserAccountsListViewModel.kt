@@ -7,6 +7,7 @@ import com.trustbank.client_mobile.domain.AccountRepository
 import com.trustbank.client_mobile.domain.LoanRepository
 import com.trustbank.client_mobile.proto.Account
 import com.trustbank.client_mobile.proto.Loan
+import com.trustbank.client_mobile.proto.ShortLoanInfo
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,9 +51,6 @@ class UserAccountsListViewModel(
                         // TODO: handle error (скорее не произойдёт)
                     }
                 }
-            }
-
-            coroutineScope {
                 launch {
                     loanRepository.getLoans().collect { loan ->
                         loan.onSuccess {
@@ -77,5 +75,5 @@ class UserAccountsListViewModel(
 
 data class UserInfoUiState(
     val accounts: List<Account> = emptyList(),
-    val loans: List<Loan> = emptyList()
+    val loans: List<ShortLoanInfo> = emptyList()
 )

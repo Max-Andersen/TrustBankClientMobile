@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Delete
@@ -24,29 +23,22 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType.Companion
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
 import com.sibstream.digitallab.ui.topbar.SingleLevelAppBar
 import com.trustbank.client_mobile.presentation.ui.theme.PADDING_BIG
-import com.trustbank.client_mobile.presentation.ui.theme.TrustBankClientMobileTheme
 import com.trustbank.client_mobile.presentation.ui.utils.OutlinedDoubleField
 import com.trustbank.client_mobile.presentation.ui.utils.convertToReadableTimeLess
 import com.trustbank.client_mobile.proto.Account
+import com.trustbank.client_mobile.proto.Loan
 import org.koin.androidx.compose.koinViewModel
 import java.util.Date
 
 @Composable
-fun AccountCardScreen(
-    navController: NavHostController,
-    onBackClick: () -> Unit
-) {
+fun CreditCardScreen(onBackClick: () -> Boolean) {
 
-    val viewModel: AccountCardViewModel = koinViewModel()
-    val uiState by viewModel.account.collectAsState()
+    val viewModel: CreditViewModel = koinViewModel()
+    val uiState by viewModel.loan.collectAsState()
 
-    var dialogState: AccountEventDialog? by remember {
+    var dialogState: CreditAccountEventDialog? by remember {
         mutableStateOf(null)
     }
 
@@ -58,7 +50,7 @@ fun AccountCardScreen(
         }
     }
 
-    AccountCardScreenStateless(
+    CreditCardScreenStateless(
         uiState = uiState,
         dialogState = dialogState,
         changeDialogState = { eventClicked -> dialogState = eventClicked },
@@ -66,8 +58,8 @@ fun AccountCardScreen(
         closeAccount = remember { { viewModel.closeAccount() } },
         moneyOperation = { amount ->
             when (dialogState) {
-                is AccountEventDialog.Deposit -> viewModel.deposit(amount)
-                is AccountEventDialog.Withdraw -> viewModel.withdraw(amount)
+                is CreditAccountEventDialog.Deposit -> viewModel.deposit(amount)
+                is CreditAccountEventDialog.Withdraw -> viewModel.withdraw(amount)
                 else -> {}
             }
         },
@@ -77,21 +69,21 @@ fun AccountCardScreen(
     )
 }
 
-private sealed class AccountEventDialog {
-    data object Deposit : AccountEventDialog()
+private sealed class CreditAccountEventDialog {
+    data object Deposit : CreditAccountEventDialog()
 
-    data object Withdraw : AccountEventDialog()
+    data object Withdraw : CreditAccountEventDialog()
 
-    data object Transfer : AccountEventDialog()
+    data object Transfer : CreditAccountEventDialog()
 }
 
 @Composable
-private fun AccountCardScreenStateless(
-    uiState: Account?,
+private fun CreditCardScreenStateless(
+    uiState: Loan?,
     onBackClick: () -> Unit,
     closeAccount: () -> Unit = {},
-    dialogState: AccountEventDialog?,
-    changeDialogState: (AccountEventDialog?) -> Unit,
+    dialogState: CreditAccountEventDialog?,
+    changeDialogState: (CreditAccountEventDialog?) -> Unit,
     moneyOperation: (Double) -> Unit = {},
     transferMoney: (Double, String) -> Unit
 ) {
@@ -118,17 +110,17 @@ private fun AccountCardScreenStateless(
             var toAccount: String by remember { mutableStateOf("") }
 
             when (it) {
-                is AccountEventDialog.Deposit -> {
+                is CreditAccountEventDialog.Deposit -> {
                     dialogTitle = "Пополнение счёта"
                     dialogText = "Введите сумму для пополнения"
                 }
 
-                is AccountEventDialog.Withdraw -> {
+                is CreditAccountEventDialog.Withdraw -> {
                     dialogTitle = "Вывод средств"
                     dialogText = "Введите сумму для вывода"
                 }
 
-                is AccountEventDialog.Transfer -> {
+                is CreditAccountEventDialog.Transfer -> {
                     dialogTitle = "Перевод средств"
                     dialogText = "Введите сумму для перевода"
                 }
@@ -151,7 +143,7 @@ private fun AccountCardScreenStateless(
                             onValueChange = { newNumber -> inputNumber = newNumber },
                         )
 
-                        if (it is AccountEventDialog.Transfer) {
+                        if (it is CreditAccountEventDialog.Transfer) {
                             TextField(
                                 value = toAccount,
                                 onValueChange = { toAccount = it },
@@ -167,7 +159,7 @@ private fun AccountCardScreenStateless(
                     TextButton(
                         onClick = {
                             inputNumber?.let { value ->
-                                if (it is AccountEventDialog.Transfer) {
+                                if (it is CreditAccountEventDialog.Transfer) {
                                     transferMoney(value, toAccount)
                                 } else {
                                     moneyOperation(value)
@@ -207,33 +199,18 @@ private fun AccountCardScreenStateless(
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { changeDialogState(AccountEventDialog.Withdraw) }) {
+                onClick = { changeDialogState(CreditAccountEventDialog.Withdraw) }) {
                 Text(text = "Вывести")
             }
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = { changeDialogState(AccountEventDialog.Deposit) }) {
+                onClick = { changeDialogState(CreditAccountEventDialog.Deposit) }) {
                 Text(text = "Пополнить")
             }
-            Button(modifier = Modifier.fillMaxWidth(), onClick = { changeDialogState(AccountEventDialog.Transfer) }) {
+            Button(modifier = Modifier.fillMaxWidth(), onClick = { changeDialogState(CreditAccountEventDialog.Transfer) }) {
                 Text(text = "Перевести")
             }
 
         }
-    }
-}
-
-@Composable
-@Preview
-private fun AccountCardScreenPreview() {
-    TrustBankClientMobileTheme {
-        AccountCardScreenStateless(
-            uiState = Account.newBuilder().setId("1").setBalance(1000).build(),
-            onBackClick = {},
-            dialogState = null,
-            changeDialogState = {},
-            moneyOperation = {},
-            transferMoney = { _, _ -> }
-        )
     }
 }

@@ -5,12 +5,14 @@ import com.trustbank.client_mobile.proto.AccountOperationServiceGrpc
 import com.trustbank.client_mobile.proto.CreateLoanRequestRequest
 import com.trustbank.client_mobile.proto.GetAccountsRequest
 import com.trustbank.client_mobile.proto.GetClientLoansRequest
+import com.trustbank.client_mobile.proto.GetLoanByIdRequest
 import com.trustbank.client_mobile.proto.GetLoanRequestRequest
 import com.trustbank.client_mobile.proto.GetLoanTariffsRequest
 import com.trustbank.client_mobile.proto.Loan
 import com.trustbank.client_mobile.proto.LoanOperationServiceGrpc
 import com.trustbank.client_mobile.proto.LoanRequest
 import com.trustbank.client_mobile.proto.LoanTariff
+import com.trustbank.client_mobile.proto.ShortLoanInfo
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -28,11 +30,11 @@ class LoanRepository(
         return responseFlow.asSharedFlow()
     }
 
-    fun getLoans(): SharedFlow<Result<Loan>> {
+    fun getLoans(): SharedFlow<Result<ShortLoanInfo>> {
         val request = GetClientLoansRequest.newBuilder()
             .build()
-        val responseFlow: MutableSharedFlow<Result<Loan>> = MutableSharedFlow()
-        val observer = getObserver<GetClientLoansRequest, Loan>(responseFlow)
+        val responseFlow: MutableSharedFlow<Result<ShortLoanInfo>> = MutableSharedFlow()
+        val observer = getObserver<GetClientLoansRequest, ShortLoanInfo>(responseFlow)
         grpcService.getLoans(request, observer)
         return responseFlow.asSharedFlow()
     }
@@ -46,8 +48,14 @@ class LoanRepository(
         return responseFlow.asSharedFlow()
     }
 
-    fun getLoanInfo(loanId: String) {
-        // TODO
+    fun getLoanInfo(loanId: String): SharedFlow<Result<Loan>> {
+        val request = GetLoanByIdRequest.newBuilder()
+            .setId(loanId)
+            .build()
+        val responseFlow: MutableSharedFlow<Result<Loan>> = MutableSharedFlow()
+        val observer = getObserver<GetClientLoansRequest, Loan>(responseFlow)
+        grpcService.getLoanById(request, observer)
+        return responseFlow.asSharedFlow()
     }
 
 
