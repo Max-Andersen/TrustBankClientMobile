@@ -33,10 +33,12 @@ import org.koin.androidx.compose.koinViewModel
 import java.util.Date
 
 @Composable
-fun CreditCardScreen(onBackClick: () -> Boolean) {
+fun CreditCardScreen(
+    onBackClick: () -> Unit
+) {
 
     val viewModel: CreditViewModel = koinViewModel()
-    val uiState by viewModel.loan.collectAsState()
+    val uiState by viewModel.account.collectAsState()
 
     var dialogState: CreditAccountEventDialog? by remember {
         mutableStateOf(null)
@@ -45,7 +47,7 @@ fun CreditCardScreen(onBackClick: () -> Boolean) {
     LaunchedEffect(key1 = Unit) {
         viewModel.effects.collect {
             when (it) {
-                is AccountCardEffect.NavigateBack -> onBackClick()
+                is CreditAccountCardEffect.NavigateBack -> onBackClick()
             }
         }
     }
@@ -55,7 +57,6 @@ fun CreditCardScreen(onBackClick: () -> Boolean) {
         dialogState = dialogState,
         changeDialogState = { eventClicked -> dialogState = eventClicked },
         onBackClick = onBackClick,
-        closeAccount = remember { { viewModel.closeAccount() } },
         moneyOperation = { amount ->
             when (dialogState) {
                 is CreditAccountEventDialog.Deposit -> viewModel.deposit(amount)
@@ -79,9 +80,8 @@ private sealed class CreditAccountEventDialog {
 
 @Composable
 private fun CreditCardScreenStateless(
-    uiState: Loan?,
+    uiState: Pair<Loan, Account>?,
     onBackClick: () -> Unit,
-    closeAccount: () -> Unit = {},
     dialogState: CreditAccountEventDialog?,
     changeDialogState: (CreditAccountEventDialog?) -> Unit,
     moneyOperation: (Double) -> Unit = {},
@@ -91,15 +91,10 @@ private fun CreditCardScreenStateless(
         topBar = {
             SingleLevelAppBar(
                 title = "Информация по счёту",
-                onBackClick = onBackClick,
-                actions = {
-                    IconButton(onClick = { closeAccount() }) {
-                        Icon(imageVector = Icons.Rounded.Delete, contentDescription = null)
-                    }
-                })
+                onBackClick = onBackClick
+            )
         }
     ) { paddings ->
-
 
         dialogState?.let {
             var dialogTitle = ""
@@ -185,15 +180,20 @@ private fun CreditCardScreenStateless(
             uiState?.let {
                 with(uiState) {
                     SelectionContainer {
-                        Text(text = "id $id")
+                        Text(text = "id ${second.id}")
                     }
 
-                    Text(text = "Баланс ${balance / 100f} руб.")
-                    Text(text = type.toString())
-                    Text(text = "Дата создания " + Date(creationDate.seconds).convertToReadableTimeLess())
-                    if (closingDate.seconds != 0L)
-                        Text(text = "Дата закрытия `" + Date(closingDate.seconds).convertToReadableTimeLess())
-                    Text(text = "Счёт заблокирован  $isBlocked")
+                    Text(text = "Баланс ${second.balance / 100f} руб.")
+                    Text(text = "Процентная ставка ${first.tariff.interestRate}%")
+                    Text(text = "Длительность кредита ${first.loanTermInDays} дня(ей)")
+                    Text(text = "Изначальная сумма ${first.amountLoan / 100f} руб.")
+                    Text(text = "Задолжность ${first.amountDebt / 100f} руб.")
+                    Text(text = "Начисленные пени ${first.accruedPenny / 100f} руб.")
+                    Text(text = second.type.toString())
+                    Text(text = "Дата создания " + Date(second.creationDate.seconds).convertToReadableTimeLess())
+                    if (second.closingDate.seconds != 0L)
+                        Text(text = "Дата закрытия `" + Date(second.closingDate.seconds).convertToReadableTimeLess())
+                    Text(text = "Счёт заблокирован  ${second.isBlocked}")
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -207,7 +207,9 @@ private fun CreditCardScreenStateless(
                 onClick = { changeDialogState(CreditAccountEventDialog.Deposit) }) {
                 Text(text = "Пополнить")
             }
-            Button(modifier = Modifier.fillMaxWidth(), onClick = { changeDialogState(CreditAccountEventDialog.Transfer) }) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { changeDialogState(CreditAccountEventDialog.Transfer) }) {
                 Text(text = "Перевести")
             }
 

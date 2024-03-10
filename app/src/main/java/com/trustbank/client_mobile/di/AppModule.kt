@@ -56,7 +56,7 @@ val appModule = module {
         CreateCreditViewModel(get(), get())
     }
     viewModel {
-        CreditViewModel(get(), get())
+        CreditViewModel(get(),get(), get())
     }
 
 
