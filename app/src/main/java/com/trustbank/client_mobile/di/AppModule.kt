@@ -90,9 +90,8 @@ val appModule = module {
     }
 
     single {
-        val url = Uri.parse("http://10.0.2.2:50051/")
         val interceptor: HeaderClientInterceptor = get(named(CLIENT_INTERCEPTOR))
-        ManagedChannelBuilder.forAddress(url.host, url.port).usePlaintext()
+        ManagedChannelBuilder.forAddress("176.209.222.85", 50051).usePlaintext()
             .intercept(interceptor).build()
     }
 
